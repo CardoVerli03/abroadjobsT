@@ -1,0 +1,25 @@
+name: Scrape Reed
+
+on:
+  schedule:
+    - cron: '15 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Reed scraper
+        env:
+          VERCEL_URL: ${{ secrets.VERCEL_URL }}
+          SCRAPE_SECRET: ${{ secrets.SCRAPE_SECRET }}
+          REED_API_KEY: ${{ secrets.REED_API_KEY }}
+        run: node scrapers/reed.js

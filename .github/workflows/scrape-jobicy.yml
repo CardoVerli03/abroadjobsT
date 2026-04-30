@@ -1,0 +1,24 @@
+name: Scrape Jobicy
+
+on:
+  schedule:
+    - cron: '25 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Jobicy scraper
+        env:
+          VERCEL_URL: ${{ secrets.VERCEL_URL }}
+          SCRAPE_SECRET: ${{ secrets.SCRAPE_SECRET }}
+        run: node scrapers/jobicy.js

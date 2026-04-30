@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  telegramId      String   @unique
+  planType        String   @default("free")
+  planExpiresAt   DateTime?
+  dailyViewsUsed  Int      @default(0)
+  dailyViewLimit  Int      @default(2)
+  lastViewReset   DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  savedJobs       SavedJob[]
+  cryptoPayments  CryptoPayment[]
+  keywords        KeywordSuggestion[]
+}
+
+model Job {
+  id              String   @id @default(cuid())
+  source          String
+  sourceId        String?
+  title           String
+  company         String?
+  location        String?
+  country         String?
+  description     String?
+  salary          String?
+  salaryMin       Float?
+  salaryMax       Float?
+  salaryCurrency  String?
+  jobType         String?
+  url             String?
+  tags            String?
+  isRemote        Boolean  @default(false)
+  isPriority      Boolean  @default(false)
+  postedAt        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  savedBy         SavedJob[]
+}
+
+model SavedJob {
+  id         String   @id @default(cuid())
+  userId     String
+  jobId      String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+}
+
+model CryptoPayment {
+  id            String   @id @default(cuid())
+  userId        String
+  txid          String
+  amount        Float
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model KeywordSuggestion {
+  id        String   @id @default(cuid())
+  userId    String
+  keyword   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PostbackLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  status      String?
+  profit      Float?
+  processed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model JobView {
+  id        String   @id @default(cuid())
+  userId    String
+  jobId     String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, jobId])
+}
